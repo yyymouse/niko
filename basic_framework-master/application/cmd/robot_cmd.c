@@ -18,7 +18,11 @@
 #define PTICH_HORIZON_ANGLE (PITCH_HORIZON_ECD * ECD_ANGLE_COEF_DJI) // pitch水平时电机的角度,0-360
 
 /* cmd应用包含的模块实例指针和交互信息存储*/
+static Publisher_t *chassis_cmd_pub;
+static Subscriber_t *chassis_sub;
 
+static Chassis_Ctrl_Cmd_s chassis_cmd_send;      // 发送给底盘应用的信息,包括控制信息和UI绘制相关
+static Chassis_Upload_Data_s chassis_fetch_data;
 
 
 
