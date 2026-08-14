@@ -13,6 +13,10 @@
 #include "bsp_dwt.h"
 #include "referee_UI.h"
 #include "arm_math.h"
+#define HALF_WHEEL_BASE (WHEEL_BASE /2) //半轴距
+#define HALF_TRACK_WIDTH (TRACK_WIDTH /2.0f) //半轮距
+#define PERIMETER_WHEEL (RADIUS_WHEEL * 2 * PI) // 轮子周长
+
 
 static Subscriber_t *chassis_sub;
 static Publisher_t *chassis_pub;
@@ -21,6 +25,9 @@ static Chassis_Upload_Data_s gimbal_upload_data;
 
 static SuperCapInstance *cap;
 static DJIMotorInstance *motor_lf,*motor_rf,*motor_lb,*motor_rb;
+
+static float chassis_vx, chassis_vy;
+static float vt_lf, vt_rf, vt_lb, vt_rb;                  // 底盘速度解算后的临时输出,待进行限幅
 
 void chassiInit()
 {
@@ -46,6 +53,33 @@ void chassiInit()
             .motor_type = M3508,
 
     };
+    chassis_motor_config.can_init_config.tx_id =1;
+    chassis_motor_config.controller_setting_init_config.motor_reverse_flag =MOTOR_DIRECTION_NORMAL;
+    motor_lf = PowerControlInit(&chassis_motor_config);
+
+    chassis_motor_config.can_init_config.tx_id = 2;
+    chassis_motor_config.controller_setting_init_config.motor_reverse_flag =MOTOR_DIRECTION_NORMAL;
+    motor_rf = PowerControlInit(&chassis_motor_config);
+
+    chassis_motor_config.can_init_config.tx_id = 3;
+    chassis_motor_config.controller_setting_init_config.motor_reverse_flag =MOTOR_DIRECTION_NORMAL;
+    motor_lb = PowerControlInit(&chassis_motor_config);
+
+    chassis_motor_config.can_init_config.tx_id = 4;
+    chassis_motor_config.controller_setting_init_config.motor_reverse_flag =MOTOR_DIRECTION_NORMAL;
+    motor_rb = PowerControlInit(&chassis_motor_config);
+
+    chassis_sub = SubRegister("chassis_cmd",sizeof(Chassis_Ctrl_Cmd_s));
+    chassis_pub = PubRegister("chassis_feed",sizeof(Chassis_Upload_Data_s));
+
+}
+
+
+static void MecanumCalculate()
+{
+
+
+
 }
 void chassisTask()
 {
